@@ -198,6 +198,8 @@ class Connection(object):
                 self.eof = True
             elif self.buf == '':
                 self.eof = True
+            elif len(self.buf) != (end - self.offset):
+                self.eof = True
         ret = self.buf[self.i:self.i + n]
         self.i += len(ret)
         return ret
