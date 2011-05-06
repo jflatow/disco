@@ -48,7 +48,7 @@ Now let's try creating our word count db from scratch, and querying it::
 There are a few things to note in this example.
 First of all, we use a :func:`disco.worker.classic.func.nop_map`,
 since we do all the real work in our *map_reader*.
-We use a builtin :func:`disco.worker.classic.input_stream`,
+We use a builtin :func:`disco.worker.classic.func.input_stream`,
 to return a :class:`DiscoDB <discodb.DiscoDB>` from the file on disk,
 and that's the object our *map_reader* gets as a handle.
 
