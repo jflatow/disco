@@ -69,6 +69,10 @@ class Disco(object):
         from disco.ddfs import DDFS
         return DDFS(self.master)
 
+    @property
+    def num_workers(self):
+        return sum(ni['max_workers'] for ni in self.nodeinfo().values())
+
     def nodeinfo(self):
         """
         Returns a dictionary describing status of the nodes that are managed by

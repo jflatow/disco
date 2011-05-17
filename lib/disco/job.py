@@ -128,6 +128,12 @@ class Job(object):
 
 class SimpleJob(Job):
     from disco.worker.simple import Worker
+    def node_partition(self, (key, val)):
+        return str((hash(key) &  0xffffffff) % self.disco.num_workers)
+
+    @classmethod
+    def absdir(cls, path):
+        return os.path.abspath(os.path.dirname(path))
 
 class JobChain(dict):
     def wait(self, poll_interval=1):

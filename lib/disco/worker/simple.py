@@ -8,10 +8,40 @@ which simply calls a method corresponding to the :attr:`disco.task.Task.mode`.
 The method to call is determined using :meth:`disco.worker.Worker.getitem`.
 """
 from disco import worker
+from disco.fileutils import DiscoOutput
+from disco.util import iterify
 
 class Worker(worker.Worker):
+    def defaults(self):
+        defaults = super(Worker, self).defaults()
+        defaults.update({'home': (), 'libs': ()})
+        return defaults
+
+    def jobenvs(self, job, **jobargs):
+        envs = super(Worker, self).jobenvs(job, **jobargs)
+        libs = tuple(iterify(self.getitem('libs', job, jobargs)))
+        def pushenv(envname, *envvals):
+            envs[envname] = ':'.join(filter(None, envvals + (envs.get(envname),)))
+        pushenv('LD_LIBRARY_PATH', *libs)
+        pushenv('PYTHONPATH', *libs)
+        return envs
+
+    def jobzip(self, job, **jobargs):
+        jobzip = super(Worker, self).jobzip(job, **jobargs)
+        for path in iterify(self.getitem('home', job, jobargs)):
+            jobzip.writepath(path)
+        for path in iterify(self.getitem('libs', job, jobargs)):
+            jobzip.writepath(path, exclude=('.pyc'))
+        return jobzip
+
     def run(self, task, job, **jobargs):
-        self.getitem(task.mode, job, jobargs)(self, task, **jobargs)
+        def get(key, default=None):
+            return self.getitem(key, job, jobargs, default=default)
+        self.task = task
+        partition = get('%s_partition' % task.mode, lambda i: None)
+        output_fn = get('%s_output', DiscoOutput)
+        for i in self.input(task, open=get(task.mode)):
+            self.output(task, partition(i), open=output_fn).file.append(i)
 
 if __name__ == '__main__':
     Worker.main()
