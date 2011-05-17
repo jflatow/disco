@@ -29,7 +29,7 @@ class Worker(worker.Worker):
     def jobzip(self, job, **jobargs):
         jobzip = super(Worker, self).jobzip(job, **jobargs)
         for path in iterify(self.getitem('home', job, jobargs)):
-            jobzip.writepath(path)
+            jobzip.writepath(path, root='')
         for path in iterify(self.getitem('libs', job, jobargs)):
             jobzip.writepath(path, exclude=('.pyc'))
         return jobzip

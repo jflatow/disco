@@ -134,11 +134,15 @@ class DiscoZipFile(ZipFile, object):
         self.buffer = StringIO()
         super(DiscoZipFile, self).__init__(self.buffer, 'w', ZIP_DEFLATED)
 
-    def writepath(self, pathname, exclude=()):
+    def writepath(self, pathname, exclude=(), root=None):
+        pathroot = os.path.dirname(pathname)
         for file in files(pathname):
             name, ext = os.path.splitext(file)
             if ext not in exclude:
-                self.write(file, file)
+                if root is None:
+                    self.write(file)
+                else:
+                    self.write(file, arcname=file.replace(pathroot, root, 1))
 
     def writemodule(self, module, arcname=None):
         if isinstance(module, basestring):
