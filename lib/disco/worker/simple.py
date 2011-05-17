@@ -31,7 +31,7 @@ class Worker(worker.Worker):
         for path in iterify(self.getitem('home', job, jobargs)):
             jobzip.writepath(path, root='')
         for path in iterify(self.getitem('libs', job, jobargs)):
-            jobzip.writepath(path, exclude=('.pyc'))
+            jobzip.writepath(path, exclude=('.pyc',))
         return jobzip
 
     def run(self, task, job, **jobargs):
