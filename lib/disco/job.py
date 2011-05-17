@@ -95,6 +95,7 @@ class Job(object):
         self.disco = master if isinstance(master, Disco) else Disco(master)
         self.worker = worker or self.Worker()
         self.settings = settings or DiscoSettings()
+        self.num_workers = self.disco.num_workers
 
     def __getattr__(self, attr):
         if attr in self.proxy_functions:
@@ -129,11 +130,7 @@ class Job(object):
 class SimpleJob(Job):
     from disco.worker.simple import Worker
     def node_partition(self, (key, val)):
-        return str((hash(key) &  0xffffffff) % self.disco.num_workers)
-
-    @classmethod
-    def absdir(cls, path):
-        return os.path.abspath(os.path.dirname(path))
+        return str((hash(key) &  0xffffffff) % self.num_workers)
 
 class JobChain(dict):
     def wait(self, poll_interval=1):

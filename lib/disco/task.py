@@ -105,6 +105,14 @@ class Task(object):
     def url(self, name, scheme='disco'):
         return '%s://%s/disco/%s/%s/%s' % (scheme, self.host, self.jobpath, self.taskpath, name)
 
+    def urlsplit(self, url):
+        from disco.util import urlsplit
+        return urlsplit(url,
+                        localhost=self.host,
+                        disco_port=self.disco_port,
+                        disco_data=self.disco_data,
+                        ddfs_data=self.ddfs_data)
+
     def get(self, key):
         """
         Gets an out-of-band result for the task with the key *key*.

@@ -22,8 +22,8 @@ class Worker(worker.Worker):
         libs = tuple(iterify(self.getitem('libs', job, jobargs)))
         def pushenv(envname, *envvals):
             envs[envname] = ':'.join(filter(None, envvals + (envs.get(envname),)))
-        pushenv('LD_LIBRARY_PATH', *libs)
-        pushenv('PYTHONPATH', *libs)
+        pushenv('LD_LIBRARY_PATH', *(l.strip('/') for l in libs))
+        pushenv('PYTHONPATH', *(l.strip('/') for l in libs))
         return envs
 
     def jobzip(self, job, **jobargs):
@@ -37,7 +37,7 @@ class Worker(worker.Worker):
     def run(self, task, job, **jobargs):
         def get(key, default=None):
             return self.getitem(key, job, jobargs, default=default)
-        self.task = task
+        self.task = job.task = task
         partition = get('%s_partition' % task.mode, lambda i: None)
         output_fn = get('%s_output', DiscoOutput)
         for i in self.input(task, open=get(task.mode)):
