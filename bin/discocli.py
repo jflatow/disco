@@ -352,6 +352,17 @@ def purge(program, *jobnames):
         program.disco.purge(jobname)
 
 @Disco.job_command
+def report(program, jobname):
+    """Usage: jobname
+
+    Get the Job instance for the jobname and use it to read the results.
+    """
+    from disco.job import Job
+    job, jobargs = Job.from_jobpack(jobname, program.disco.jobpack(jobname))
+    for record in job.report(**jobargs):
+        print record
+
+@Disco.job_command
 def results(program, jobname):
     """Usage: jobname
 

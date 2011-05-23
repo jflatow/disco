@@ -17,6 +17,9 @@ def jobdata(*objs):
     """
     return dPickle.dumps(objs, -1)
 
+def jobobjs(data):
+    return dPickle.loads(data)
+
 class Task(object):
     """
     Encapsulates the information specific to a particular
@@ -63,7 +66,7 @@ class Task(object):
         self.jobfile = jobfile
         self.jobname = jobname
         self.jobpack = JobPack.load(open(jobfile))
-        self.jobobjs = dPickle.loads(self.jobpack.jobdata)
+        self.jobobjs = jobobjs(self.jobpack.jobdata)
         self.master = master
         self.disco_port = disco_port
         self.put_port = put_port

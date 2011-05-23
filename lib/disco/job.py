@@ -103,6 +103,10 @@ class Job(object):
             return partial(getattr(self.disco, attr), self.name)
         raise AttributeError("%r has no attribute %r" % (self, attr))
 
+    def report(self, **jobargs):
+        status, results = self.results()
+        return self.disco.result_iterator(results)
+
     def run(self, **jobargs):
         """
         Creates the :class:`JobPack` for the worker using
@@ -126,6 +130,17 @@ class Job(object):
                           task.jobdata(self, jobargs))
         self.name = self.disco.submit(jobpack.dumps())
         return self
+
+    @classmethod
+    def from_jobpack(cls, jobname, jobpack):
+        from tempfile import NamedTemporaryFile
+        jobhome = NamedTemporaryFile(suffix='.zip')
+        jobhome.write(jobpack.jobhome)
+        jobhome.flush()
+        sys.path.insert(0, jobhome.name)
+        job, jobargs = task.jobobjs(jobpack.jobdata)
+        job.name = jobname
+        return job, jobargs
 
 class SimpleJob(Job):
     from disco.worker.simple import Worker
