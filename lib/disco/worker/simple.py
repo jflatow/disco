@@ -39,7 +39,7 @@ class Worker(worker.Worker):
             return self.getitem(key, job, jobargs, default=default)
         self.task = job.task = task
         partition = get('%s_partition' % task.mode, lambda i: None)
-        output_fn = get('%s_output', DiscoOutput)
+        output_fn = get('%s_output' % task.mode, DiscoOutput)
         for i in self.input(task, open=get(task.mode)):
             self.output(task, partition(i), open=output_fn).file.append(i)
 
