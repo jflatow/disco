@@ -8,7 +8,6 @@ which simply calls a method corresponding to the :attr:`disco.task.Task.mode`.
 The method to call is determined using :meth:`disco.worker.Worker.getitem`.
 """
 from disco import worker
-from disco.fileutils import DiscoOutput
 from disco.util import iterify
 
 class Worker(worker.Worker):
@@ -16,6 +15,14 @@ class Worker(worker.Worker):
         defaults = super(Worker, self).defaults()
         defaults.update({'home': (), 'libs': ()})
         return defaults
+
+    def has_map(self, job, **jobargs):
+        return (bool(self.getitem('map', job, jobargs)) or
+                bool(self.getitem('map_input', job, jobargs)))
+
+    def has_reduce(self, job, **jobargs):
+        return (bool(self.getitem('reduce', job, jobargs)) or
+                bool(self.getitem('reduce_input', job, jobargs)))
 
     def jobenvs(self, job, **jobargs):
         envs = super(Worker, self).jobenvs(job, **jobargs)
@@ -37,11 +44,13 @@ class Worker(worker.Worker):
     def run(self, task, job, **jobargs):
         def get(key, default=None):
             return self.getitem(key, job, jobargs, default=default)
-        self.task = job.task = task
-        partition = get('%s_partition' % task.mode, lambda i: None)
-        output_fn = get('%s_output' % task.mode, DiscoOutput)
-        for i in self.input(task, open=get(task.mode)):
-            self.output(task, partition(i), open=output_fn).file.append(i)
+        job.worker, job.task, job.jobargs = self, task, jobargs
+        task_fn   = get(task.mode) or (lambda i: i)
+        part_fn   = get('%s_partition' % task.mode) or (lambda i: None)
+        input_fn  = get('%s_input' % task.mode)
+        output_fn = get('%s_output' % task.mode)
+        for i in task_fn(self.input(task, open=input_fn)):
+            self.output(task, part_fn(i), open=output_fn).file.append(i)
 
 if __name__ == '__main__':
     Worker.main()

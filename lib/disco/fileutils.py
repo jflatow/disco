@@ -129,6 +129,26 @@ class DiscoOutput(DiscoOutputStream_v1):
         super(DiscoOutput, self).close()
         self.stream.close()
 
+class DiscoDBOutput(object):
+    def __init__(self, url, **flags):
+        from discodb import DiscoDBConstructor
+        self.discodb_constructor = DiscoDBConstructor()
+        self.url, self.flags = url, flags
+
+    def append(self, (key, val)):
+        self.discodb_constructor.add(key, val)
+
+    def close(self):
+        with AtomicFile(self.url) as handle:
+            self.discodb_constructor.finalize(**self.flags).dump(handle)
+
+    @classmethod
+    def with_flags(cls, **flags):
+        class PartialDiscoDBOutput(DiscoDBOutput):
+            def __init__(self, url):
+                super(PartialDiscoDBOutput, self).__init__(url, **flags)
+        return PartialDiscoDBOutput
+
 class DiscoZipFile(ZipFile, object):
     def __init__(self):
         self.buffer = StringIO()

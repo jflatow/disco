@@ -137,6 +137,12 @@ class Worker(dict):
             return getattr(job, key)
         return self.get(key, default)
 
+    def has_map(self, job, **jobargs):
+        return bool(self.getitem('map', job, jobargs))
+
+    def has_reduce(self, job, **jobargs):
+        return bool(self.getitem('reduce', job, jobargs))
+
     def jobdict(self, job, **jobargs):
         """
         Creates :ref:`jobdict` for the :class:`Worker`.
@@ -176,8 +182,8 @@ class Worker(dict):
         from disco.util import inputlist, ispartitioned, read_index
         def get(key, default=None):
             return self.getitem(key, job, jobargs, default)
-        has_map = bool(get('map'))
-        has_reduce = bool(get('reduce'))
+        has_map = self.has_map(job, **jobargs)
+        has_reduce = self.has_reduce(job, **jobargs)
         input = inputlist(get('input', []),
                           partition=None if has_map else False,
                           settings=job.settings)
