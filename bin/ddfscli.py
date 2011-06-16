@@ -161,12 +161,34 @@ def df(program, *args):
     """
     raise NotImplementedError("API does not yet support this operation")
 
-def du(program, *args):
-    """Usage: <undefined>
+@DDFS.add_job_mode
+@DDFS.command
+def du(program, *inputs):
+    """Usage: [input ...]
 
-    Display the disk usage statistics for a tag.
+    Display the disk usage statistics for the inputs.
     """
-    raise NotImplementedError("API does not yet support this operation")
+    from disco.core import result_iterator
+    from disco.util import disk_usage, format_size
+    from disco.job import SimpleJob as Job
+    def format(size):
+        return format_size(size) if program.options.human else size
+    job = Job(name='DiskUsage', master=program.disco, settings=program.settings)
+    job.run(input=program.input(*inputs),
+            map_input=disk_usage)
+    if program.options.total:
+        print 'total', format(sum(size for url, size in result_iterator(job.wait())))
+    else:
+        for url, size in result_iterator(job.wait()):
+            print '%s\t%s' % (url, format(size))
+    job.purge()
+
+du.add_option('-H', '--human',
+              action='store_true',
+              help='print human-readable sizes')
+du.add_option('-T', '--total',
+              action='store_true',
+              help='print only the total')
 
 @DDFS.command
 def exists(program, tag):
