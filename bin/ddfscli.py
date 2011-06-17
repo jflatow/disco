@@ -172,23 +172,23 @@ def du(program, *inputs):
     from disco.util import disk_usage, format_size
     from disco.job import SimpleJob as Job
     def format(size):
-        return format_size(size) if program.options.human else size
+        return size if program.options.no_human else format_size(size)
     job = Job(name='DiskUsage', master=program.disco, settings=program.settings)
     job.run(input=program.input(*inputs),
             map_input=disk_usage)
-    if program.options.total:
-        print 'total', format(sum(size for url, size in result_iterator(job.wait())))
-    else:
+    if program.options.no_total:
         for url, size in result_iterator(job.wait()):
             print '%s\t%s' % (url, format(size))
+    else:
+        print 'total', format(sum(size for url, size in result_iterator(job.wait())))
     job.purge()
 
-du.add_option('-H', '--human',
+du.add_option('-H', '--no-human',
               action='store_true',
-              help='print human-readable sizes')
-du.add_option('-T', '--total',
+              help='disable human-readable sizes')
+du.add_option('-T', '--no-total',
               action='store_true',
-              help='print only the total')
+              help='disable total')
 
 @DDFS.command
 def exists(program, tag):
