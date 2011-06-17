@@ -321,11 +321,6 @@ def load_oob(host, name, key):
     for fd in ddfs.pull(ddfs.job_oob(name), blobfilter=lambda x: x == key):
         return fd.read()
 
-
-def disk_usage(url):
-    from disco.schemes import open
-    yield url, len(open(url))
-
 def format_size(num):
     for unit in [' bytes','KB','MB','GB','TB']:
         if num < 1024.:

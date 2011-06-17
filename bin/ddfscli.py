@@ -170,13 +170,12 @@ def du(program, *inputs):
     The disk usage does not account for replicas!
     """
     from disco.core import result_iterator
-    from disco.util import disk_usage, format_size
-    from disco.job import SimpleJob as Job
+    from disco.util import format_size
+    from disco.job import DiskUsage
     def format(size):
         return size if program.options.no_human else format_size(size)
-    job = Job(name='DiskUsage', master=program.disco, settings=program.settings)
-    job.run(input=program.input(*inputs),
-            map_input=disk_usage)
+    job = DiskUsage(master=program.disco, settings=program.settings)
+    job.run(input=program.input(*inputs))
     if program.options.no_total:
         for url, size in result_iterator(job.wait()):
             print '%s\t%s' % (url, format(size))

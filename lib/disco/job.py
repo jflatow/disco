@@ -151,6 +151,11 @@ class SimpleJob(Job):
     def node_partition(self):
         return self.hash_partition(self.disco.num_workers)
 
+class DiskUsage(SimpleJob):
+    def map_input(self, url):
+        from disco import schemes
+        yield url, len(schemes.open(url, task=self.task))
+
 class JobChain(dict):
     def wait(self, poll_interval=1):
         while sum(self.walk()) < len(self):
