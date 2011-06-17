@@ -167,6 +167,7 @@ def du(program, *inputs):
     """Usage: [input ...]
 
     Display the disk usage statistics for the inputs.
+    The disk usage does not account for replicas!
     """
     from disco.core import result_iterator
     from disco.util import disk_usage, format_size
